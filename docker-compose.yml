@@ -1,0 +1,30 @@
+version: "3.8"
+
+networks:
+  pythonsql:
+
+services:
+  mysqldb:
+    image: mysql:latest
+    container_name: mysqldb
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=devprojdb
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - pythonsql
+
+  python_application:
+    build: ./
+    container_name: python_applications
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    networks:
+      - pythonsql
